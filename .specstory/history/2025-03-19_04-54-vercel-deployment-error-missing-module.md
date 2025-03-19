@@ -102,6 +102,84 @@ If none of these suggestions help, it might be useful to check your Vercel deplo
 
 ---
 
+_**User**_
+
+I'm now getting this error
+
+[Error: Cannot find module '/vercel/path0/node_modules/.pnpm/bcrypt@5.1.1/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node'
+
+---
+
+_**Assistant**_
+
+This new error is related to the `bcrypt` module, which is commonly used for password hashing. The error indicates that Vercel can't find a specific binary file that's part of the bcrypt package during deployment.
+
+This is a common issue when deploying Node.js applications with native dependencies like bcrypt to serverless environments like Vercel. Here are some approaches to fix it:
+
+## Option 1: Use bcryptjs instead of bcrypt
+
+The simplest solution is to replace `bcrypt` with `bcryptjs`, which is a pure JavaScript implementation that doesn't require native bindings:
+
+1. Install bcryptjs:
+```bash
+npm install bcryptjs
+npm uninstall bcrypt
+# or with yarn
+yarn add bcryptjs
+yarn remove bcrypt
+# or with pnpm
+pnpm add bcryptjs
+pnpm remove bcrypt
+```
+
+2. Update your imports in your code:
+```javascript:path/to/your/auth/file
+// Replace this:
+// import bcrypt from 'bcrypt';
+
+// With this:
+import bcrypt from 'bcryptjs';
+
+// The API is the same, so you don't need to change how you use it
+```
+
+## Option 2: Add bcrypt as a Vercel dependency
+
+If you specifically need to use bcrypt (not bcryptjs), you can add it to your Vercel project as a dependency:
+
+Create or update a `vercel.json` file in your project root:
+
+```json:vercel.json
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node",
+      "config": {
+        "installCommand": "npm install --no-save bcrypt"
+      }
+    }
+  ]
+}
+```
+
+## Option 3: Use a different password hashing solution
+
+If you're building a Next.js app with authentication, consider using a solution like NextAuth.js or Clerk, which handle authentication complexities for you.
+
+## Option 4: Make sure you're using the right version of bcrypt
+
+If you need to stick with bcrypt, make sure you're using a version that's compatible with your Node.js version on Vercel. Try:
+
+```bash
+npm uninstall bcrypt
+npm install bcrypt@5.0.1
+```
+
+After making any of these changes, try deploying again. Option 1 (switching to bcryptjs) is usually the most straightforward solution for serverless environments like Vercel.
+
+---
+
 
 
 ---
